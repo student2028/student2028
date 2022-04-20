@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>JVM面试题Part1 | 花逍遥</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 5.4.2"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">JVM面试题Part1</h1><a id="logo" href="/.">花逍遥</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Home</i></a><a href="/archives/"><i class="fa fa-archive"> Archive</i></a><a href="/about/"><i class="fa fa-user"> About</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">JVM面试题Part1</h1><div class="post-meta">2021-07-10<span> | </span><span class="category"><a href="/categories/%E9%9D%A2%E8%AF%95%E9%A2%98/">面试题</a></span></div><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">Contents</div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-JVM%E5%86%85%E5%AD%98%E6%8F%8F%E8%BF%B0%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">1. JVM内存描述？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="toc-number">2.</span> <span class="toc-text">2. 对象的创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">3. 垃圾回收算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">4. 垃圾收集器</span></a></li></ol></div></div><div class="post-content"><h3 id="1-JVM内存描述？"><a href="#1-JVM内存描述？" class="headerlink" title="1. JVM内存描述？"></a>1. JVM内存描述？</h3><p>程序计数器，VM栈，本地栈和堆，metaspace(方法区)。</p>
+<p><strong>程序计数器</strong>，&gt; 是一块较小的内存空间，当前线程执行的字节码的行号指示器。<br>字节码解释器工作时就是能过改变这个计数器的值来获取下一条要执行的字节码指令，<br>分支，循环，跳转和异常的处理，线程恢复等基础功能都要依赖这个计数器完成。</p>
+<p>它是JVM规范中规定的唯一没有内存溢出情况的区域。</p>
+<p><strong>VM栈</strong>  虚拟机栈描述的是JAVA方法执行的内存模型，每一个方法在执行的同时都会<br>创建一个栈用于存储局部变量表，操作数栈，动态链接，方法出口等信息。<br>它有两种溢出的可能:</p>
+<ol>
+<li>栈溢出:线程请求的的栈深度大于虚拟机所允许的深度。例如递归循环终止条件不正确的设计。</li>
+<li>内存溢出:虚拟机栈可以动态扩展，如果扩展时无法申请到足够的内存，就会抛出oom异常。</li>
+</ol>
+<p><strong>本地栈</strong> 为执行本地方法服务，也会有上述两种溢出情况。</p>
+<p><strong>方法区（metaspace)</strong>: 类的信息，常量池，静态变量，JIT编译后的代码数据。<br>它有一个别名叫NonHeap.如果内存不够，也会抛出OOM异常</p>
+<p><strong>堆</strong>: 用于存放对象实例，所有的对象实例和数组都要在堆上分配，但由于逃逸分析技术等的发展，<br>现在也不绝对。</p>
+<p>垃圾收集器管理的主要区域就是堆。为了更快更好地收集，现在多是分代处理机制。<br>有新生代和老年代，新生代又分为(eden空间，from survivor, to surfvivor)。<br>新生代和老年代采用不同的垃圾收集算法。<br>如果没有足够的内存来分配实例 ，并且也无法扩展时，会抛出OOM异常。</p>
+<p><strong>直接内存</strong> java从1.4开始引入了NIO，使用channel,buffer的IO方式，可以使用native的函数直接<br>分配堆外内存，然后通过存储在java堆中的directbytebuffer对象作为这块内存的引用进行操作。<br>在一些场景中可以提高性能，因为避免了在java堆和native堆中来回复制这些数据。<br>这块区域如果内存不够也会抛出OOMError的异常。</p>
+<h3 id="2-对象的创建"><a href="#2-对象的创建" class="headerlink" title="2. 对象的创建"></a>2. 对象的创建</h3><blockquote>
+<p>请描述下java中对象创建的过程？<br>使用new关键字加上对象名，可以创建对象实例。<br>对于new指令，首先检查指令参数（类名）是否在常量池中，如果可以在常量池中定位一个符号引用，<br>检查这个符号引用代表的类是否已经加载解析和初始化过，如果没有，则需要加载校验初始化这个类。<br>然后就是分配内存，对象所需要的内存大小在类加载完成后就可以完全确定。</p>
+</blockquote>
+<blockquote>
+<p>jvm如何知道堆中哪些块是free的呢？<br>使用serial,parnew等带有compact算法的收集器时，系统采用的分配方式是指针碰撞，而使用<br>CMS这种标记清除算法的收集器时，通常采用空闲列表（记录哪些块是空闲的）。<br>内存分配的这个操作也不是线程安全的，如何实现的呢？<br>jvm使用CAS配上失败重试的方式保证操作的原子性。<br>另一种内存分配动作按照线程划分在不同的空间之中进行，即每一个线程在Java堆中分配一小块内存，称为<br>本地线程缓冲（TLAB).只有TLAB用完了，才需要同步锁定。虚拟机是否使用TLAB，可以使用参数<br>-XX:+/-UseTLAB来设定。<br>内存分配完成后，JVM会把分配的空间都初始化成零值（不包含对象头）。<br>然后对对象进行必要的设置，如这个对象是哪个类的实例，对象的hashcode,gc分类信息，锁信息，这些配置<br>都在对象头中。<br>然后会调用类中的init方法。（静态方法优先执行）</p>
+</blockquote>
+<p>对象在内存中存储的布局有三个区域：对象头，实例数据和对象填充。<br>对象头还有一个类型指针，即对象指向它的类元数据的指针，标明这个对象是哪个类的实例。<br>由于hotspot的JVM自动内存管理系统要求对象起始地址必须是8字节的整数倍，所以当<br>对象实例数据部分没有对齐时，就需要通过对齐填充来补全。<br>对象的访问定位，我们需要使用栈上的reference来定位堆上的实例数据。<br>对象访问方式取决于JVM的实现，目前主流的访问方式有句柄和直接指针两种。<br>直接指针的方式栈中存储的就是对象的地址，直接快速，但是GC操作后如果移动了对象就需要更新这个地址。<br>Hotspot JVM是使用这种方式来访问对象的。</p>
+<h3 id="3-垃圾回收算法"><a href="#3-垃圾回收算法" class="headerlink" title="3. 垃圾回收算法"></a>3. 垃圾回收算法</h3><blockquote>
+<p>如何判断哪些对象该被回收？<br>采用可达性分析的方式，从GC Roots出发，向下搜索，所走过的路径称为引用链，当一个对象到GC Roots之间<br>没有引用链时，就确定该对象是不可用的。</p>
+</blockquote>
+<p>Java中，可作为<code>GC Roots</code>的对象有下面几种：</p>
+<ul>
+<li>虚拟机栈中引用的对象</li>
+<li>方法区(metaspace)中类静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>本地方法栈中JNI引用的对象</li>
+</ul>
+<blockquote>
+<p><strong>垃圾收集算法</strong></p>
+</blockquote>
+<ol>
+<li>标记清除算法 缺点：效率低，会产生空间碎片。</li>
+<li>复制算法 ：追求高效，IBM研究表明，很多新生对象存活的时间很短，所以现在新生代中Eden和Survivor（from,to)<br>分的比例是8:1,所以每次新生代的空间使用率是90%，只有10%是浪费的。当Survivor空间不够用的，需要依赖老年代的内存。</li>
+<li>标记整理算法 ： 老年代中的对象存活的时间长，不能采用复制算法。标记整理算法的标记和标记清除一样，然后让存活的对象<br>向都向一端移动，然后直接清理掉端边界以外的内存。</li>
+<li>分代算法<br>为了提高效率，根据对象生存周期划分成新生代和老年代，针对不同特点采用不同的算法。<br>新生代使用复制算法，老年代使用标记整理或标记清除算法。<blockquote>
+<p>GC为什么需要stop the world？<br>可达性分析执行时，如果不stw,则无法保证扫描结果的正确性。<br>当进入GC时，线程会怎么办？<br>在方法调用，循环跳转，异常跳转等地方设置安全点。<br>在代码中不会发生引用变化的地方，称为安全区域。<br>在安全点设置中断标记，如果为真，则线程主动中断挂起。<br>在线程离开安全区域的时候，检查gc roots是否检查完成，如果没有，则等待。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="4-垃圾收集器"><a href="#4-垃圾收集器" class="headerlink" title="4. 垃圾收集器"></a>4. 垃圾收集器</h3><ol>
+<li><p><strong>Serial收集器</strong></p>
+<blockquote>
+<p>单线程完成收集，要求STW。仍然是client模式下新生代的默认配置。</p>
+</blockquote>
+</li>
+<li><p><strong>ParNew收集器</strong><br>ParNew收集器是Serial收集器的多线程版本。它也是现在Server模式下首先的新生代收集器。<br>是因为老年代现在多是选用CMS收集器，而只有ParNew/Serial才可以和它搭配使用。</p>
+</li>
+<li><p><strong>Parallel Scavenge收集器</strong><br>目标是达到一个可控制的吞吐量（即用户线程运行时间/(GC时间+用户线程运行时间);<br>CMS目标是达到较短的停顿时间，适合需要与用户交互的程序，给用户良好的体验。<br>而高吞吐量可以高效地使用cpu的时间，尽快完成程序的运算任务，主要适合在后台运算而不需要<br>太多交互的任务。</p>
+</li>
+</ol>
+<p>-XX:MaxGCPauseMills：最大GC停顿时间<br>-XX:GCTimeRatio:GC时间占比</p>
+<ol start="4">
+<li><p><strong>Serial old收集器</strong><br>单线程收集器，标记整理算法，主要意义也是给Client模式下的JVM使用。<br>它可以作为CMS收集器的后备预案。</p>
+</li>
+<li><p><strong>Parallel old收集器</strong><br>是parallel scavenge收集器的老年代版本，使用多线程和标记整理算法。</p>
+</li>
+<li><p><strong>CMS收集器</strong><br>目标是获取最短回收停顿时间。<br>运作过程分为四个步骤：</p>
+<blockquote>
+<p>初始标记-&gt;并发标记-&gt;重新标记-&gt;并发清除</p>
+</blockquote>
+</li>
+</ol>
+<p><strong>初始标记</strong>仅是标记和GC Roots 能直接关联到的对象。<br><strong>重新标记</strong>：为了修正并发标记期间因为用户程序继续运作而导致标记产生变动的那一部分。<br>由于整个过程中耗时最长的并发标记和并发清除过程收集器和用户线程都可以一起工作，<br>总体来说它停顿时间比较短。<br>它的缺点：</p>
+<ol>
+<li>对CPU资源比较敏感 大于4个的情况下，使用25%的CPU资源。</li>
+<li>CMS收集器无法处理浮动垃圾，可能会出现Concurrent mode failure 失败而导致一次<br>FullGC的产生。<br>jdk1.6开始，CMS收集器的启动的阈值是92%， 要是CMS运行期间预留的内存无法满足程序需要，<br>就会出现concurrent mode failure,这时就会使用serial old来进行老年代的垃圾收集。</li>
+<li>空间碎片过多时，就会给大对象的分配带来困难，往往出现老年代还有很大的空余，但是没有足够大<br>的连续的空间来分配给当前对象，不得不提前触发一次FULL GC的产生。</li>
+</ol>
+</div><div class="tags"><a href="/tags/JAVA"><i class="fa fa-tag">JAVA</i></a></div><div class="post-nav"><a class="pre" href="/2021/07/11/Java%E9%9B%86%E5%90%88%E9%9D%A2%E8%AF%95%E9%A2%98/">Java集合面试题1</a><a class="next" href="/2021/07/05/oojs/">面向对象的JavaScript</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://example.com"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Categories</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/JS/">JS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AD%A6%E4%B9%A0/">学习</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%94%9F%E6%B4%BB/">生活</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E9%9D%A2%E8%AF%95%E9%A2%98/">面试题</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/JAVA/" style="font-size: 15px;">JAVA</a> <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/" style="font-size: 15px;">面试题</a> <a href="/tags/Scala/" style="font-size: 15px;">Scala</a> <a href="/tags/Spark/" style="font-size: 15px;">Spark</a> <a href="/tags/Hbase/" style="font-size: 15px;">Hbase</a> <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 15px;">大数据</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 15px;">算法</a> <a href="/tags/JS/" style="font-size: 15px;">JS</a> <a href="/tags/%E8%AF%AD%E5%BD%95/" style="font-size: 15px;">语录</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 15px;">生活</a> <a href="/tags/%E6%97%85%E8%A1%8C/" style="font-size: 15px;">旅行</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Recent</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/09/22/%E6%84%9F%E5%86%92123/">感冒123</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/20/%E7%A8%BB%E7%9B%9B%E7%9A%84%E6%B4%BB%E6%B3%95/">稻盛的活法</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/14/%E5%A4%8F%E8%8A%B1%E5%AF%B9%E8%AF%9D%E5%BD%951/">夏花对话录1</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/09/Scala%E5%AD%A6%E4%B9%A0Part3/">Scala学习Part3</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/08/Spark%E9%9D%A2%E8%AF%95%E9%A2%98Part1/">Spark面试题Part1</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/07/Scala%E5%AD%A6%E4%B9%A0Part1/">Scala学习Part1</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/07/Scala%E5%AD%A6%E4%B9%A02/">Scala学习Part2</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/09/04/%E7%A7%8B%E6%9E%AB/">秋枫</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/26/Part1/">大数据之Hbase Part1</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/07/25/%E7%90%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86Part1/">理解Java中的动态代理Part1</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Links</i></div><ul></ul><a href="https://www.cnblogs.com/huaxiaoyao/" title="博客园" target="_blank">博客园</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2022 <a href="/." rel="nofollow">花逍遥.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js?v=1.0.0" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css?v=1.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>
